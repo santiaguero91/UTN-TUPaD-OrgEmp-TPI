@@ -1,0 +1,37 @@
+{
+  "1001": {
+    "nombre": "Juan Garcia",
+    "plan": "Fibra 100MB",
+    "saldo": 4500.0,
+    "deuda": 0.0,
+    "estado_cuenta": "activo"
+  },
+  "1002": {
+    "nombre": "Ana Lopez",
+    "plan": "Cable 50MB",
+    "saldo": 1200.0,
+    "deuda": 850.0,
+    "estado_cuenta": "moroso"
+  },
+  "1003": {
+    "nombre": "Carlos Martinez",
+    "plan": "Fibra 200MB",
+    "saldo": 3200.0,
+    "deuda": 0.0,
+    "estado_cuenta": "activo"
+  },
+  "1004": {
+    "nombre": "Maria Rodriguez",
+    "plan": "Cable 50MB",
+    "saldo": 0.0,
+    "deuda": 1500.0,
+    "estado_cuenta": "suspendido"
+  },
+  "1005": {
+    "nombre": "Roberto Silva",
+    "plan": "Fibra 100MB",
+    "saldo": 2800.0,
+    "deuda": 0.0,
+    "estado_cuenta": "activo"
+  }
+}
