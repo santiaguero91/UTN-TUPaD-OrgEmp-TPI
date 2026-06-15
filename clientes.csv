@@ -1,0 +1,6 @@
+id,nombre,plan,saldo,deuda,estado_cuenta
+1001,Juan Garcia,Fibra 100MB,4500.0,0.0,activo
+1002,Ana Lopez,Cable 50MB,1200.0,850.0,moroso
+1003,Carlos Martinez,Fibra 200MB,3200.0,0.0,activo
+1004,Maria Rodriguez,Cable 50MB,0.0,1500.0,suspendido
+1005,Roberto Silva,Fibra 100MB,2800.0,0.0,activo

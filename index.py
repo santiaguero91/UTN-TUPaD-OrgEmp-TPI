@@ -1,70 +1,75 @@
-from auxiliares import bot, clientes, enviar, sesion, sesiones, validar_cliente
-from contantes import MENU, P_CLIENTE
+import telebot
+
+from auxiliares import clientes
 from consultar import _consultar_saldo
-from tickets import _elegir_problema, _ver_tickets
+from problemas import _problemas, esperando_problema
+from tickets import _ver_tickets
+
+TOKEN = "8790755755:AAGiwTePbLozTWwyZ1HTdZgSBrRrZQ-Pqho"
+
+bot = telebot.TeleBot(TOKEN)
+
+# Guarda que cliente esta identificado en cada chat
+sesiones = {}
+
+# Inicio de aplicacion cuando el bot recibe el comando /start
+# Solicita el numero de cliente
 
 
-def _pedir_cliente(chat_id, texto, s):
-    if not validar_cliente(chat_id, texto): return
+@bot.message_handler(commands=['start'])
+def start(message):
 
-    s["cliente_id"] = texto
-    s["estado"] = "menu"
-    cliente = clientes[texto]
-    enviar(chat_id, f"Hola {cliente['nombre']}!\n\n{MENU}")
+    # Reiniciamos el estado del chat para empezar de nuevo
+    sesiones.pop(message.chat.id, None)
+    esperando_problema.discard(message.chat.id)
 
+    bot.send_message(message.chat.id, "Ingrese numero de cliente: ")
 
-def _menu(chat_id, texto, s):
-    if   texto == "1": _reportar_problema(chat_id, s)
-    elif texto == "2": _consultar_saldo(chat_id, s)
-    elif texto == "3": _ver_tickets(chat_id, s)
-    else: enviar(chat_id, "Opcion invalida. Ingrese 1, 2 o 3.")
+# Cuando recibe un comando distinto:
 
 
-def _reportar_problema(chat_id, s):
-    cliente = clientes[s["cliente_id"]]
+@bot.message_handler(func=lambda m: True)
+def menu(message):
+    MENU = (
+        "=== SOPORTE TECNICO - INTERNETX ===\n\n"
+        "1. Reportar problema\n"
+        "2. Consultar saldo\n"
+        "3. Ver mis tickets\n\n"
+        "Escriba MENU en cualquier momento para volver aqui."
+    )
 
-    # Gateway 1 — cuenta suspendida: bloquea el ticket
-    if cliente["estado_cuenta"] == "suspendido":
-        enviar(chat_id, f"Cuenta SUSPENDIDA (deuda: ${cliente['deuda']:.2f}). Llame al 0800-555-INET.")
+    # Si todavia no se identifico, el mensaje debe ser su numero de cliente
+    if message.chat.id not in sesiones:
+        if message.text in clientes:
+            sesiones[message.chat.id] = message.text
+            bot.send_message(message.chat.id, MENU)
+        else:
+            bot.send_message(message.chat.id, "Cliente no encontrado")
+        return
+    # Si escribe MENU, limmpia esperando_problema y volvemos al inicio
+    if message.text.upper() == "MENU":
+        esperando_problema.discard(message.chat.id)
+        bot.send_message(message.chat.id, MENU)
         return
 
-    # Gateway 2 — cuenta morosa: aviso pero puede continuar
-    if cliente["estado_cuenta"] == "moroso":
-        enviar(chat_id, f"ATENCION: deuda pendiente de ${cliente['deuda']:.2f}.")
-
-    s["estado"] = "elegir_problema"
-    enviar(chat_id, "Tipo de problema:\n1. Sin internet\n2. Internet lento\n3. Router apagado\n4. Falla intermitente")
-
-
-# ── Dispatcher ────────────────────────────────────────────────────
-HANDLERS = {
-    "pedir_cliente":  _pedir_cliente,
-    "menu":           _menu,
-    "elegir_problema": _elegir_problema,
-}
-
-# ── Comandos /start y /menu ───────────────────────────────────────
-@bot.message_handler(commands=["start", "menu"])
-def cmd_inicio(msg):
-    sesiones[msg.chat.id] = {"estado": "pedir_cliente", "cliente_id": None}
-    enviar(msg.chat.id, P_CLIENTE)
-
-# ── Handler principal ─────────────────────────────────────────────
-@bot.message_handler(func=lambda _: True)
-def handle(msg):
-    chat_id = msg.chat.id
-    texto   = msg.text.strip()
-    s       = sesion(chat_id)
-
-    if texto.upper() in ("MENU", "/MENU") and s["cliente_id"] is not None:
-        s["estado"] = "menu"
-        enviar(chat_id, MENU)
+    # Esto es necesario para que los ingresos no trigereen el menu nuevamente
+    # sino  la funcion _problemas
+    if message.chat.id in esperando_problema:
+        _problemas(message, sesiones[message.chat.id], bot, MENU)
         return
 
-    handler = HANDLERS.get(s["estado"])
-    if handler:
-        handler(chat_id, texto, s)
+    # Si ya esta identificado, el mensaje debe ser una opcion del menu
+    if message.text == "1":
+        _problemas(message, sesiones[message.chat.id], bot, MENU)
+    elif message.text == "2":
+        cliente_id = sesiones[message.chat.id]
+        bot.send_message(message.chat.id, _consultar_saldo(cliente_id))
+    elif message.text == "3":
+        cliente_id = sesiones[message.chat.id]
+        bot.send_message(message.chat.id, _ver_tickets(cliente_id))
+    else:
+        bot.send_message(message.chat.id, "Opcion invalida.")
 
-# ── Iniciar bot ───────────────────────────────────────────────────
+
 print("Bot corriendo... Presiona Ctrl+C para detener.")
-bot.polling()
+bot.infinity_polling()
