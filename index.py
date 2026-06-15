@@ -1,11 +1,16 @@
+import os
+
 import telebot
+from dotenv import load_dotenv
 
 from auxiliares import clientes
 from consultar import _consultar_saldo
 from problemas import _problemas, esperando_problema
 from tickets import _ver_tickets
 
-TOKEN = "8790755755:AAGiwTePbLozTWwyZ1HTdZgSBrRrZQ-Pqho"
+load_dotenv()
+
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 bot = telebot.TeleBot(TOKEN)
 
