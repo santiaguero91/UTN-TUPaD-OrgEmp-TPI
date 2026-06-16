@@ -39,7 +39,8 @@ def menu(message):
         "=== SOPORTE TECNICO - INTERNETX ===\n\n"
         "1. Reportar problema\n"
         "2. Consultar saldo\n"
-        "3. Ver mis tickets\n\n"
+        "3. Ver mis tickets\n"
+        "4. Terminar consultas\n\n"
         "Escriba MENU en cualquier momento para volver aqui."
     )
 
@@ -63,7 +64,7 @@ def menu(message):
         _problemas(message, sesiones[message.chat.id], bot, MENU)
         return
 
-    # Si ya esta identificado, el mensaje debe ser una opcion del menu
+    # Si esta identificado, el mensaje debe ser una opcion del menu
     if message.text == "1":
         _problemas(message, sesiones[message.chat.id], bot, MENU)
     elif message.text == "2":
@@ -72,6 +73,10 @@ def menu(message):
     elif message.text == "3":
         cliente_id = sesiones[message.chat.id]
         bot.send_message(message.chat.id, _ver_tickets(cliente_id))
+        bot.send_message(message.chat.id, MENU)
+    elif message.text == "4":
+        sesiones.pop(message.chat.id, None)
+        bot.send_message(message.chat.id, "Consulta finalizada. Gracias por elegirnos!!")
     else:
         bot.send_message(message.chat.id, "Opcion invalida.")
 
