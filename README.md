@@ -25,3 +25,5 @@ TELEGRAM_BOT_TOKEN=tu_token_aqui
 Este token es provisto por BotFather de Telegram al crear un bot. Una vez configurado el entorno, el bot se inicia ejecutando el comando `python index.py` en la carpeta raíz del proyecto.
 
 Para inicializar el bot el primer mensaje a mandar al bot es `/start`
+
+Ingresar numero del cliente : (clientes en BD  van de 1001 al 1005)
